@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compartilhar Localização</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #map {
+            height: 300px;
+            width: 100%;
+            margin-top: 20px;
+            display: none;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #location-info {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Compartilhar Localização</h1>
+    <p>Clique no botão abaixo para compartilhar sua localização atual.</p>
+    
+    <button id="share-location">Compartilhar Localização</button>
+    
+    <div id="location-info"></div>
+    <div id="map"></div>
+
+    <script>
+        document.getElementById('share-location').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        // Sucesso ao obter a localização
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        
+                        // Exibir informações
+                        const locationInfo = document.getElementById('location-info');
+                        locationInfo.innerHTML = `
+                            <p><strong>Localização obtida com sucesso!</strong></p>
+                            <p>Latitude: ${latitude}</p>
+                            <p>Longitude: ${longitude}</p>
+                            <p>Precisão: ${position.coords.accuracy} metros</p>
+                        `;
+                        locationInfo.style.display = 'block';
+                        
+                        // Exibir mapa (usando OpenStreetMap)
+                        const map = document.getElementById('map');
+                        map.innerHTML = `
+                            <iframe 
+                                width="100%" 
+                                height="100%" 
+                                frameborder="0" 
+                                scrolling="no" 
+                                marginheight="0" 
+                                marginwidth="0" 
+                                src="https://www.openstreetmap.org/export/embed.html?bbox=${longitude-0.01}%2C${latitude-0.01}%2C${longitude+0.01}%2C${latitude+0.01}&amp;layer=mapnik&amp;marker=${latitude}%2C${longitude}">
+                            </iframe>
+                        `;
+                        map.style.display = 'block';
+                    },
+                    function(error) {
+                        // Erro ao obter a localização
+                        let errorMessage;
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = "Permissão negada pelo usuário.";
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = "Informações de localização indisponíveis.";
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = "A requisição para obter localização expirou.";
+                                break;
+                            case error.UNKNOWN_ERROR:
+                                errorMessage = "Ocorreu um erro desconhecido.";
+                                break;
+                        }
+                        document.getElementById('location-info').innerHTML = `
+                            <p style="color: red;"><strong>Erro:</strong> ${errorMessage}</p>
+                        `;
+                        document.getElementById('location-info').style.display = 'block';
+                    }
+                );
+            } else {
+                // Geolocalização não suportada
+                document.getElementById('location-info').innerHTML = `
+                    <p style="color: red;"><strong>Seu navegador não suporta geolocalização.</strong></p>
+                `;
+                document.getElementById('location-info').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
